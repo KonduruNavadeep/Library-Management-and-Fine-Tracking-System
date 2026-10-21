@@ -17,9 +17,7 @@ def is_not_empty(value):
 
 
 def is_valid_date_format(date_str):
-    """
-    Validates that a date is in the format YYYY-MM-DD[cite: 2].
-    """
+    #Validates that a date is in the format YYYY-MM-DD[cite: 2].
     if not date_str or not str(date_str).strip():
         return False, "Date cannot be empty."
     
@@ -49,9 +47,7 @@ def validate_issue_and_due_dates(issue_date_str, due_date_str):
 
 
 def is_positive_integer(value, field_name="Value"):
-    """
-    Validates that an ID or quantity is a positive whole number[cite: 2].
-    """
+    #Validates that an ID or quantity is a positive whole number[cite: 2].
     valid, msg = is_not_empty(value)
     if not valid:
         return False, f"{field_name} cannot be empty."
@@ -66,9 +62,7 @@ def is_positive_integer(value, field_name="Value"):
 
 
 def is_valid_fine_amount(value):
-    """
-    Validates that fine payment amount is a non-negative decimal or integer[cite: 2].
-    """
+    #Validates that fine payment amount is a non-negative decimal or integer[cite: 2].
     valid, msg = is_not_empty(value)
     if not valid:
         return False, "Fine amount cannot be empty."
@@ -82,7 +76,7 @@ def is_valid_fine_amount(value):
         return False, "Fine amount must be a valid number."
 
 
-# ------------------ Local Test Block ------------------
+#  Local Test Block 
 if __name__ == "__main__":
     print("Testing Validation Functions...\n")
     
