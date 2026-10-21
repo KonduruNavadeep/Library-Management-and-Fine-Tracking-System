@@ -79,7 +79,7 @@ class CirculationApp:
 
         tk.Label(container, text="Due Date (YYYY-MM-DD):", font=("Arial", 10, "bold")).grid(row=3, column=0, sticky="w", pady=10)
         self.due_date_entry = tk.Entry(container, font=("Arial", 10), width=30)
-        self.due_date_entry.insert(0, (datetime.now() + timedelta(days=14)).strftime("%Y-%m-%d"))
+        self.due_date_entry.insert(0, (datetime.now() + timedelta(days=30)).strftime("%Y-%m-%d"))
         self.due_date_entry.grid(row=3, column=1, pady=10, padx=10)
 
         tk.Button(
@@ -123,7 +123,7 @@ class CirculationApp:
             conn.close()
 
             self.refresh_return_table()
-            messagebox.showinfo("Success", f"Book #{book_id} issued to Member #{member_id} via Stored Procedure!")
+            messagebox.showinfo("Success", f"Book #{book_id} issued to Member #{member_id} ")
             self.issue_member_entry.delete(0, tk.END)
             self.issue_book_entry.delete(0, tk.END)
         except mysql.connector.Error as err:
