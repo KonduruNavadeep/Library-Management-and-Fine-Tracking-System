@@ -158,14 +158,21 @@ class BooksFrame(ttk.Frame):
         if self.selected_id is None:
             messagebox.showwarning("No Selection", "Select a book from the table first.")
             return
+        try:
+            # borrow_records uses ON DELETE CASCADE, so check first to avoid wiping history
+            count = self._run("SELECT COUNT(*) FROM Borrow_Records WHERE book_id=%s",
+                              (self.selected_id,), fetch=True)[0][0]
+        except mysql.connector.Error as e:
+            messagebox.showerror("Database Error", str(e))
+            return
+        if count > 0:
+            messagebox.showerror(
+                "Cannot Delete", f"This book has {count} borrow record(s), so it cannot be deleted.")
+            return
         if not messagebox.askyesno("Confirm Delete", "Delete the selected book?"):
             return
         try:
             self._run("DELETE FROM Books WHERE book_id=%s", (self.selected_id,))
-        except mysql.connector.IntegrityError:
-            messagebox.showerror(
-                "Cannot Delete", "This book has borrow records, so it cannot be deleted.")
-            return
         except mysql.connector.Error as e:
             messagebox.showerror("Database Error", str(e))
             return
