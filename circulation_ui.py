@@ -9,16 +9,7 @@ from datetime import datetime, timedelta
 import mysql.connector
 from validators import is_positive_integer, validate_issue_and_due_dates
 
-# Configure your MySQL root password here
-DB_CONFIG = {
-    "host": "localhost",
-    "user": "root",
-    "password": "6872",  
-    "database": "library_db"
-}
-
-def get_connection():
-    return mysql.connector.connect(**DB_CONFIG)
+from db_config import get_connection
 
 
 class CirculationApp:
