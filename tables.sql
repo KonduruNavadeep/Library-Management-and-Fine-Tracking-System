@@ -1,7 +1,7 @@
 CREATE DATABASE IF NOT EXISTS library_db;
 USE library_db;
 
---Users Table (System Authentication)
+-- Users Table (System Authentication)
 CREATE TABLE IF NOT EXISTS Users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
