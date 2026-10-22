@@ -2,16 +2,10 @@ from http.server import SimpleHTTPRequestHandler, HTTPServer
 import mysql.connector
 import json
 import webbrowser
-
-DB_CONFIG = {
-    "host": "localhost",
-    "user": "251132",
-    "password": "123456",  # <-- Replace with your MySQL password
-    "database": "library_db"
-}
+from db_config import get_connection   # shared connection file (password comes from db_local.py if needed)
 
 def fetch_data():
-    conn = mysql.connector.connect(**DB_CONFIG)
+    conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     
     # 1. Summary Metrics
