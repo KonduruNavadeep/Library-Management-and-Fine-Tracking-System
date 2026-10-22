@@ -1,6 +1,11 @@
 """
 Module: circulation_ui.py
 Role: Member 3 - Circulation & Fine Logic Lead (Connected to MySQL)
+
+Changes from the original:
+  - uses the shared db_config.get_connection() instead of a hardcoded password
+  - database errors on the Return and Fine tabs are shown in a popup
+  - the return date is validated (format, and not before the issue date)
 """
 
 import tkinter as tk
@@ -8,17 +13,7 @@ from tkinter import ttk, messagebox
 from datetime import datetime, timedelta
 import mysql.connector
 from validators import is_positive_integer, validate_issue_and_due_dates
-
-# Configure your MySQL root password here
-DB_CONFIG = {
-    "host": "localhost",
-    "user": "root",
-    "password": "6872",  
-    "database": "library_db"
-}
-
-def get_connection():
-    return mysql.connector.connect(**DB_CONFIG)
+from db_config import get_connection   # each person keeps their own db_config.py (not in git)
 
 
 class CirculationApp:
@@ -192,8 +187,8 @@ class CirculationApp:
                 self.return_tree.insert("", "end", values=row)
             cursor.close()
             conn.close()
-        except mysql.connector.Error:
-            pass
+        except mysql.connector.Error as err:
+            messagebox.showerror("Database Error", str(err))
 
     def handle_return_book(self):
         selected = self.return_tree.selection()
@@ -201,9 +196,24 @@ class CirculationApp:
             messagebox.showwarning("Select Item", "Please select an issued book record to return.")
             return
 
-        values = self.return_tree.item(selected)["values"]
-        issue_id, book_id = values[0], values[1]
+        values = self.return_tree.item(selected[0])["values"]
+        issue_id, book_id, issue_date = values[0], values[1], str(values[4])
         return_date = self.return_date_entry.get().strip()
+
+        # Validate the return date: correct format, and not before the issue date
+        try:
+            parsed_return = datetime.strptime(return_date, "%Y-%m-%d")
+        except ValueError:
+            messagebox.showerror("Date Validation Error",
+                                 "Return date must be a valid date in YYYY-MM-DD format.")
+            return
+        try:
+            if parsed_return < datetime.strptime(issue_date, "%Y-%m-%d"):
+                messagebox.showerror("Date Validation Error",
+                                     "Return date cannot be before the issue date.")
+                return
+        except ValueError:
+            pass  # issue date could not be parsed; let the database decide
 
         try:
             conn = get_connection()
@@ -289,15 +299,16 @@ class CirculationApp:
                 self.fine_tree.insert("", "end", values=row)
             cursor.close()
             conn.close()
-        except mysql.connector.Error:
-            pass
+        except mysql.connector.Error as err:
+            messagebox.showerror("Database Error", str(err))
+
     def handle_pay_fine(self):
         selected = self.fine_tree.selection()
         if not selected:
             messagebox.showwarning("Select Fine", "Please select a fine entry from the table.")
             return
 
-        values = self.fine_tree.item(selected)["values"]
+        values = self.fine_tree.item(selected[0])["values"]
         fine_id, status = values[0], values[4]
 
         if status == "Paid":
@@ -326,4 +337,4 @@ class CirculationApp:
 if __name__ == "__main__":
     root_window = tk.Tk()
     app = CirculationApp(root_window)
-    root_window.mainloop()     
+    root_window.mainloop()
