@@ -19,7 +19,7 @@ from db_config import get_connection   # each person keeps their own db_config.p
 class CirculationApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Library Management - Circulation & Fines (Member 3)")
+        self.root.title("Library Management - Circulation & Fines ")
         self.root.geometry("900x620")
         self.root.resizable(False, False)
 

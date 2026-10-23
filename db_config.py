@@ -2,14 +2,14 @@
 import mysql.connector
 
 DB_HOST = "localhost"
-DB_USER = "root"
+DB_USER = ""
 DB_PASSWORD = ""            # default: MySQL with no password
 DB_NAME = "library_db"
 
 # Personal override: if you have a MySQL password, put it in db_local.py
 # (that file is never committed)
 try:
-    from db_local import DB_PASSWORD
+    from db_local import DB_PASSWORD,DB_USER
 except ImportError:
     pass
 
