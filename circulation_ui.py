@@ -7,7 +7,6 @@ Changes from the original:
   - database errors on the Return and Fine tabs are shown in a popup
   - the return date is validated (format, and not before the issue date)
 """
-
 import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import datetime, timedelta
@@ -15,26 +14,22 @@ import mysql.connector
 from validators import is_positive_integer, validate_issue_and_due_dates
 from db_config import get_connection   # each person keeps their own db_config.py (not in git)
 
+class CirculationFrame(ttk.Frame):
+    def __init__(self, parent):
+        super().__init__(parent)
 
-class CirculationApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Library Management - Circulation & Fines ")
-        self.root.geometry("900x620")
-        self.root.resizable(False, False)
-
-        header = tk.Frame(self.root, bg="#2C3E50", height=50)
+        header = tk.Frame(self, bg="#2C3E50", height=45)
         header.pack(fill="x")
         tk.Label(
             header,
             text="Circulation & Fine Management Module",
-            font=("Arial", 14, "bold"),
+            font=("Segoe UI", 13, "bold"),
             fg="white",
             bg="#2C3E50"
-        ).pack(pady=12)
+        ).pack(pady=10)
 
-        notebook = ttk.Notebook(self.root)
-        notebook.pack(fill="both", expand=True, padx=15, pady=15)
+        notebook = ttk.Notebook(self)
+        notebook.pack(fill="both", expand=True, padx=10, pady=10)
 
         self.issue_tab = ttk.Frame(notebook)
         self.return_tab = ttk.Frame(notebook)
@@ -47,6 +42,11 @@ class CirculationApp:
         self.setup_issue_tab()
         self.setup_return_tab()
         self.setup_fine_tab()
+
+        notebook = ttk.Notebook(self)
+        notebook.pack(fill="both", expand=True, padx=15, pady=15)
+
+        
 
     # 1. ISSUE BOOK SCREEN (Calls Stored Procedure IssueBook)
     def setup_issue_tab(self):
@@ -336,5 +336,10 @@ class CirculationApp:
 
 if __name__ == "__main__":
     root_window = tk.Tk()
-    app = CirculationApp(root_window)
+    root_window.title("Library Management - Circulation & Fines")
+    root_window.geometry("900x620")
+    
+    app = CirculationFrame(root_window)
+    app.pack(fill="both", expand=True)  # <-- If this pack line is missing, the window stays tiny & blank
+    
     root_window.mainloop()
