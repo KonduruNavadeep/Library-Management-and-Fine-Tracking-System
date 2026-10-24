@@ -197,3 +197,12 @@ class MembersFrame(ttk.Frame):
         for var in (self.reg_var, self.name_var, self.dept_var, self.email_var, self.phone_var):
             var.set("")
         self.tree.selection_remove(self.tree.selection())
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.title("Member Management")
+    root.geometry("950x650")
+
+    app = MembersFrame(root)
+    app.pack(fill="both", expand=True)
+
+    root.mainloop()

@@ -196,3 +196,13 @@ class BooksFrame(ttk.Frame):
         for var in self.vars.values():
             var.set("")
         self.tree.selection_remove(self.tree.selection())
+    
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.title("Book Inventory Management")
+    root.geometry("950x650")
+    
+    app = BooksFrame(root)
+    app.pack(fill="both", expand=True)
+    
+    root.mainloop()

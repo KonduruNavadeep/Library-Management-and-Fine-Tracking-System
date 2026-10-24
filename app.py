@@ -1,8 +1,11 @@
+"""
+app.py - Analytics & Reports Dashboard Module (Member 4)
+Exports DashboardFrame for integration into main.py.
+"""
 import tkinter as tk
 from tkinter import ttk, messagebox
 import mysql.connector
 from db_config import get_connection
-
 
 class LibraryDashboardApp(tk.Tk):
     def __init__(self):
@@ -29,26 +32,36 @@ class LibraryDashboardApp(tk.Tk):
         self.style.map("Treeview", background=[("selected", "#cbd5e1")])
 
         # Header Title
-        header_frame = tk.Frame(self, bg="#0f172a", padx=20, pady=15)
+        header_frame = tk.Frame(self, bg="#0f172a", padx=20, pady=12)
         header_frame.pack(fill="x")
         
-        tk.Label(header_frame, text="📚 Library Analytics & Reports Dashboard", 
-                 font=("Segoe UI", 18, "bold"), fg="#ffffff", bg="#0f172a").pack(anchor="w")
-        tk.Label(header_frame, text="Circulation KPIs, Revenue Summaries, and Live Overdue Defaulters Roster", 
-                 font=("Segoe UI", 10), fg="#94a3b8", bg="#0f172a").pack(anchor="w")
+        tk.Label(
+            header_frame, 
+            text="📊 Analytics, Views & Reports Dashboard", 
+            font=("Segoe UI", 16, "bold"), 
+            fg="#ffffff", 
+            bg="#0f172a"
+        ).pack(anchor="w")
+        tk.Label(
+            header_frame, 
+            text="Circulation KPIs, Revenue Summaries, and Live Overdue Defaulters Roster", 
+            font=("Segoe UI", 9), 
+            fg="#94a3b8", 
+            bg="#0f172a"
+        ).pack(anchor="w")
 
         # KPI Metrics Cards Frame
-        self.kpi_frame = tk.Frame(self, bg="#f1f5f9", padx=15, pady=10)
+        self.kpi_frame = tk.Frame(self, bg="#f1f5f9", padx=15, pady=8)
         self.kpi_frame.pack(fill="x")
 
-        # Create Metric Cards
+        # Metric Cards
         self.lbl_collected = self._create_card(self.kpi_frame, "TOTAL FINES COLLECTED", "₹0.00", "#16a34a", 0)
         self.lbl_pending = self._create_card(self.kpi_frame, "TOTAL PENDING DUES", "₹0.00", "#dc2626", 1)
         self.lbl_defaulters = self._create_card(self.kpi_frame, "ACTIVE DEFAULTERS", "0 Records", "#d97706", 2)
 
         # Tabbed Layout for Data Tables
         self.notebook = ttk.Notebook(self)
-        self.notebook.pack(fill="both", expand=True, padx=15, pady=10)
+        self.notebook.pack(fill="both", expand=True, padx=15, pady=8)
 
         # Tab 1: Overdue Defaulters View
         self.tab_defaulters = ttk.Frame(self.notebook)
@@ -70,25 +83,34 @@ class LibraryDashboardApp(tk.Tk):
         self.notebook.add(self.tab_categories, text=" 📖 Category Circulation ")
         self._build_categories_tab()
 
-        # Refresh Button & Footer
+        # Footer Refresh Button
         footer_frame = tk.Frame(self, bg="#f1f5f9", padx=15, pady=5)
         footer_frame.pack(fill="x")
         
-        btn_refresh = tk.Button(footer_frame, text="🔄 Refresh All Data", font=("Segoe UI", 10, "bold"),
-                                bg="#2563eb", fg="#ffffff", padx=12, pady=6, relief="flat", command=self.load_all_data)
+        btn_refresh = tk.Button(
+            footer_frame, 
+            text="🔄 Refresh All Data", 
+            font=("Segoe UI", 9, "bold"),
+            bg="#2563eb", 
+            fg="#ffffff", 
+            padx=10, 
+            pady=4, 
+            relief="flat", 
+            command=self.load_all_data
+        )
         btn_refresh.pack(side="right")
 
         # Initial Load
         self.load_all_data()
 
     def _create_card(self, parent, title, default_val, text_color, col_idx):
-        card = tk.Frame(parent, bg="#ffffff", bd=1, relief="solid", padx=15, pady=12)
+        card = tk.Frame(parent, bg="#ffffff", bd=1, relief="solid", padx=15, pady=10)
         card.grid(row=0, column=col_idx, padx=8, pady=5, sticky="nsew")
         parent.grid_columnconfigure(col_idx, weight=1)
 
         tk.Label(card, text=title, font=("Segoe UI", 9, "bold"), fg="#64748b", bg="#ffffff").pack(anchor="w")
-        val_label = tk.Label(card, text=default_val, font=("Segoe UI", 18, "bold"), fg=text_color, bg="#ffffff")
-        val_label.pack(anchor="w", pady=(5, 0))
+        val_label = tk.Label(card, text=default_val, font=("Segoe UI", 16, "bold"), fg=text_color, bg="#ffffff")
+        val_label.pack(anchor="w", pady=(4, 0))
         return val_label
 
     def _create_treeview(self, parent, columns, col_widths):
@@ -110,11 +132,10 @@ class LibraryDashboardApp(tk.Tk):
         return tree
 
     def _build_defaulters_tab(self):
-        # Filter controls
-        filter_frame = tk.Frame(self.tab_defaulters, bg="#f8fafc", padx=10, pady=8)
+        filter_frame = tk.Frame(self.tab_defaulters, bg="#f8fafc", padx=10, pady=6)
         filter_frame.pack(fill="x")
 
-        tk.Label(filter_frame, text="Filter by Department: ", font=("Segoe UI", 10, "bold"), bg="#f8fafc").pack(side="left")
+        tk.Label(filter_frame, text="Filter by Department: ", font=("Segoe UI", 9, "bold"), bg="#f8fafc").pack(side="left")
         self.dept_filter_var = tk.StringVar(value="All")
         self.dept_combobox = ttk.Combobox(filter_frame, textvariable=self.dept_filter_var, state="readonly", width=15)
         self.dept_combobox.pack(side="left", padx=5)
@@ -144,7 +165,7 @@ class LibraryDashboardApp(tk.Tk):
             conn = get_connection()
             cursor = conn.cursor(dictionary=True)
 
-            # 1. Update Metric Cards
+            # 1. KPI Metrics
             cursor.execute("""
                 SELECT 
                     COALESCE(SUM(CASE WHEN payment_status = 'Paid' THEN fine_amount ELSE 0 END), 0) AS collected,
@@ -153,11 +174,12 @@ class LibraryDashboardApp(tk.Tk):
                 FROM Fines;
             """)
             stats = cursor.fetchone()
-            self.lbl_collected.config(text=f"₹{stats['collected']:,.2f}")
-            self.lbl_pending.config(text=f"₹{stats['pending']:,.2f}")
-            self.lbl_defaulters.config(text=f"{stats['pending_count']} Records")
+            if stats:
+                self.lbl_collected.config(text=f"₹{float(stats['collected']):,.2f}")
+                self.lbl_pending.config(text=f"₹{float(stats['pending']):,.2f}")
+                self.lbl_defaulters.config(text=f"{stats['pending_count']} Records")
 
-            # 2. Load Defaulters View
+            # 2. Defaulters View
             cursor.execute("""
                 SELECT 
                     m.register_no, 
@@ -177,8 +199,7 @@ class LibraryDashboardApp(tk.Tk):
             """)
             self.raw_defaulters_data = cursor.fetchall()
             
-            # Populate filter combobox
-            depts = sorted(list({r["department"] for r in self.raw_defaulters_data if r["department"]}))
+            depts = sorted(list({r["department"] for r in self.raw_defaulters_data if r.get("department")}))
             self.dept_combobox["values"] = ["All"] + depts
             self.filter_defaulters()
 
@@ -257,7 +278,7 @@ class LibraryDashboardApp(tk.Tk):
         self.tree_defaulters.delete(*self.tree_defaulters.get_children())
         selected = self.dept_filter_var.get()
 
-        for r in self.raw_defaulters_data:
+        for r in getattr(self, "raw_defaulters_data", []):
             if selected == "All" or r["department"] == selected:
                 self.tree_defaulters.insert("", "end", values=(
                     r["register_no"],
@@ -271,6 +292,13 @@ class LibraryDashboardApp(tk.Tk):
                     r["payment_status"]
                 ))
 
+
+# Standalone runner so you can still test app.py by itself
 if __name__ == "__main__":
-    app = LibraryDashboardApp()
-    app.mainloop()
+    root = tk.Tk()
+    root.title("Library Analytics & Reports Dashboard")
+    root.geometry("1100x720")
+    
+    app = DashboardFrame(root)
+    
+    root.mainloop()
