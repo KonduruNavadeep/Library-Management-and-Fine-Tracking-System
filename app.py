@@ -299,6 +299,6 @@ if __name__ == "__main__":
     root.title("Library Analytics & Reports Dashboard")
     root.geometry("1100x720")
     
-    app = DashboardFrame(root)
+    app = LibraryDashboardApp(root)
     
     root.mainloop()

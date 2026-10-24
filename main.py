@@ -1,130 +1,56 @@
-"""
-main.py - Master Integrated Desktop Application
-College Library Management & Fine Tracking System
-
-Consolidates:
-  - Member 1: Database Architecture & Shared Configuration (db_config.py)
-  - Member 2: Books Inventory (books_ui.py) & Member Directory (members_ui.py)
-  - Member 3: Circulation, Borrowing & Fine Management (circulation_ui.py)
-  - Member 4: Analytics, Views & Defaulter Reports (app.py)
-"""
-
 import tkinter as tk
-from tkinter import ttk, messagebox
+from login import LoginWindow
+from dashboard import Dashboard, PAGE_BUILDERS
 
-# Import team module frames
+# Import all individual module frames
 from books_ui import BooksFrame
 from members_ui import MembersFrame
 from circulation_ui import CirculationFrame
-from app import DashboardFrame
+from app import LibraryDashboardApp
 
+class ReportsLauncher(tk.Frame):
+    """Adapter frame to launch the standalone Reports window from within the Dashboard content area."""
+    def __init__(self, parent):
+        super().__init__(parent)
+        tk.Label(self, text="Analytics & Reports", font=("Helvetica", 16, "bold")).pack(pady=30)
+        tk.Button(
+            self, 
+            text="Open Reports Dashboard", 
+            font=("Helvetica", 12),
+            bg="#2563eb",
+            fg="white",
+            command=self.launch_reports
+        ).pack(pady=10)
 
-class MasterLibraryApp(tk.Tk):
-    def __init__(self):
-        super().__init__()
-        self.title("College Library Management & Fine Tracking System")
-        self.geometry("1200x780")
-        self.minsize(1050, 700)
-        self.configure(bg="#f8fafc")
+    def launch_reports(self):
+        reports_window = LibraryDashboardApp()
+        reports_window.mainloop()
 
-        # TTK Theme & Global Styles
-        self.style = ttk.Style(self)
-        self.style.theme_use("clam")
-        
-        # Primary Navigation Tabs Styling
-        self.style.configure(
-            "TNotebook.Tab", 
-            font=("Segoe UI", 10, "bold"), 
-            padding=[16, 8],
-            background="#e2e8f0",
-            foreground="#334155"
-        )
-        self.style.map(
-            "TNotebook.Tab", 
-            background=[("selected", "#0f172a")], 
-            foreground=[("selected", "#ffffff")]
-        )
+def main():
+    while True:
+        # 1. Launch the Login Window
+        login_app = LoginWindow()
+        login_app.mainloop()
 
-        # Treeview / Table Global Styling
-        self.style.configure(
-            "Treeview", 
-            font=("Segoe UI", 9), 
-            rowheight=26, 
-            background="#ffffff", 
-            fieldbackground="#ffffff"
-        )
-        self.style.configure(
-            "Treeview.Heading", 
-            font=("Segoe UI", 9, "bold"), 
-            background="#1e293b", 
-            foreground="#ffffff"
-        )
-        self.style.map("Treeview", background=[("selected", "#cbd5e1")])
+        # 2. Exit if the window was closed without a successful login
+        if not login_app.user:
+            break 
 
-        # Top Master Header Banner
-        header = tk.Frame(self, bg="#0f172a", height=55)
-        header.pack(fill="x")
+        # 3. Register the UI frames to the Dashboard's navigation menu
+        PAGE_BUILDERS["Books"] = BooksFrame
+        PAGE_BUILDERS["Members"] = MembersFrame
+        PAGE_BUILDERS["Issue / Return"] = CirculationFrame
+        PAGE_BUILDERS["Fines"] = CirculationFrame  # Maps to the same frame containing the Fines tab
+        PAGE_BUILDERS["Reports"] = ReportsLauncher
 
-        tk.Label(
-            header,
-            text="🏛️ College Library Management & Fine Tracking System",
-            font=("Segoe UI", 15, "bold"),
-            fg="#f8fafc",
-            bg="#0f172a"
-        ).pack(side="left", padx=20, pady=12)
+        # 4. Launch the Main Dashboard with user credentials
+        user = login_app.user
+        dashboard_app = Dashboard(username=user["username"], role=user["role"])
+        dashboard_app.mainloop()
 
-        tk.Label(
-            header,
-            text="Centralized Circulation, Inventory & Defaulters Portal",
-            font=("Segoe UI", 9),
-            fg="#94a3b8",
-            bg="#0f172a"
-        ).pack(side="right", padx=20, pady=16)
-
-        # Primary Multi-Module Navigation Notebook
-        self.nav_tabs = ttk.Notebook(self)
-        self.nav_tabs.pack(fill="both", expand=True)
-
-        # Tab 1: Books Inventory (Member 2)
-        self.books_tab = BooksFrame(self.nav_tabs)
-        self.nav_tabs.add(self.books_tab, text=" 📚 Books Inventory ")
-
-        # Tab 2: Members Directory (Member 2)
-        self.members_tab = MembersFrame(self.nav_tabs)
-        self.nav_tabs.add(self.members_tab, text=" 👥 Member Directory ")
-
-        # Tab 3: Circulation & Fines (Member 3)
-        self.circulation_tab = CirculationFrame(self.nav_tabs)
-        self.nav_tabs.add(self.circulation_tab, text=" 🔄 Circulation & Returns ")
-
-        # Tab 4: Analytics, Views & Reports (Member 4 - You)
-        self.analytics_tab = DashboardFrame(self.nav_tabs)
-        self.nav_tabs.add(self.analytics_tab, text=" 📈 Reports & Analytics ")
-
-        # Auto-refresh active tab tables upon navigation
-        self.nav_tabs.bind("<<NotebookTabChanged>>", self._on_tab_change)
-
-    def _on_tab_change(self, event):
-        """Refreshes table views dynamically when clicking across tabs."""
-        try:
-            selected_text = self.nav_tabs.tab(self.nav_tabs.select(), "text")
-            
-            if "Reports & Analytics" in selected_text:
-                self.analytics_tab.load_all_data()
-            elif "Books Inventory" in selected_text:
-                self.books_tab.load_books()
-            elif "Member Directory" in selected_text:
-                self.members_tab.load_members()
-            elif "Circulation & Returns" in selected_text:
-                if hasattr(self.circulation_tab, "refresh_return_table"):
-                    self.circulation_tab.refresh_return_table()
-                if hasattr(self.circulation_tab, "refresh_fines_table"):
-                    self.circulation_tab.refresh_fines_table()
-        except Exception:
-            # Prevents UI freeze if switching tabs while a query is running
-            pass
-
+        # 5. Restart the loop if the user clicked Logout, otherwise exit completely
+        if getattr(dashboard_app, 'logged_out', False) == False:
+            break
 
 if __name__ == "__main__":
-    app = MasterLibraryApp()
-    app.mainloop()
+    main()

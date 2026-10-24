@@ -18,7 +18,7 @@ HEADER_COLOR = "#1f3a5f"
 SIDEBAR_COLOR = "#e8edf3"
 
 MENU_ITEMS = ["Home", "Books", "Members", "Issue / Return", "Fines", "Reports"]
-ADMIN_ONLY_ITEMS = ["Users"]
+ADMIN_ONLY_ITEMS = []
 
 
 class PlaceholderPage(tk.Frame):

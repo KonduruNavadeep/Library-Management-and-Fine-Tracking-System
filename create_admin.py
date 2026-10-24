@@ -21,7 +21,7 @@ def main():
     role = input("Role (Admin or Librarian) [Admin]: ").strip() or "Admin"
 
     if not username or not password:
-        print("Username and password cannot be empty.")
+        print("Username and password cannot be empty."
         return
     if role not in ("Admin", "Librarian"):
         print("Role must be Admin or Librarian.")
