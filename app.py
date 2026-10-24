@@ -1,17 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import mysql.connector
+from db_config import get_connection
 
-# Database Configuration
-DB_CONFIG = {
-    "host": "localhost",
-    "user": "251132",
-    "password": "123456",  # <-- Replace with your MySQL password
-    "database": "library_db"
-}
-
-def get_connection():
-    return mysql.connector.connect(**DB_CONFIG)
 
 class LibraryDashboardApp(tk.Tk):
     def __init__(self):
@@ -168,8 +159,21 @@ class LibraryDashboardApp(tk.Tk):
 
             # 2. Load Defaulters View
             cursor.execute("""
-                SELECT register_no, member_name, department, phone, book_title, due_date, days_overdue, fine_amount, payment_status
-                FROM Overdue_Defaulters_View;
+                SELECT 
+                    m.register_no, 
+                    m.full_name AS member_name, 
+                    m.department, 
+                    m.phone, 
+                    b.title, 
+                    br.due_date, 
+                    DATEDIFF(CURDATE(), br.due_date) AS days_overdue, 
+                    f.fine_amount, 
+                    f.payment_status
+                FROM Borrow_Records br
+                JOIN Members m ON br.member_id = m.member_id
+                JOIN Books b ON br.book_id = b.book_id
+                LEFT JOIN Fines f ON br.issue_id = f.issue_id
+                WHERE br.status = 'Issued' AND br.due_date < CURDATE();
             """)
             self.raw_defaulters_data = cursor.fetchall()
             
